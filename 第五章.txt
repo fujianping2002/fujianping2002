@@ -1,0 +1,46 @@
+12----scp命令
+
+*  scp命令
+scp命令是cp命令的升级版，即：ssh cp，通过SSH协议完成文件的复制。其主要功能就是：在不同LInux服务器之间，通过SSH协议互相传输文件
+语法：scp [-r] 参数1 参数2
+· -r选项用于复制文件夹的使用
+· 参数1：本机路径 或 远程目标路径
+· 参数2：远程目标路径 或 本机路径
+示例：
+scp -r /export/server/jdk root@node2:/export/server/
+scp node2:/export/server/jdk /export/server/
+
+cd /export/server
+scp -r jdk node2:`pwd`/
+scp -r jdk node2:$PWD
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,530 @@
+01----各类小技巧快捷键
+
+*  历史命令搜索
+Ctrl C 强制停止
+Ctrl D 退出或登出 （不能退出vi/vim）
+history 查看历史输入过的命令
+!命令前缀，自动执行上一次匹配前缀的命令
+
+*  光标移动快捷键
+Ctrl  a  跳到命令开头
+Ctrl  e  跳到命令结尾
+Ctrl 键盘左键，向左跳一个单词
+Ctrl 键盘右键，向右跳一个单词
+
+*  清屏
+Ctrl l 清空  
+clear
+
+02----软件安装
+
+*  yum命令
+yum：RPM包软件管理器，用于自动化安装配置Linux软件，并可以解决依赖问题
+语法：yum [-y] [install | remove |search] 软件名称
+· 选项，-y，自动确认，无需手动确认安装或卸载过程
+· install：安装
+· remove：卸载
+· search：搜索
+yum命令需要root权限，需要联网
+yum install wget
+yum remove wget
+yum search wget
+
+*  apt命令-扩展
+Ubuntu运行环境
+语法：apt [-y] [install | remove |search] 软件名称
+用法和yum命令一样，需要root权限，需要联网
+
+03----systemctl控制软件启动关闭
+
+*  systemctl命令
+Linux系统很多软件（内置或第三方软件）均支持使用systemctl命令控制：启动、停止、开机自启
+能够被systemctl管理的软件，一般也被称为：服务
+语法：systemctl start | stop | enable |disable
+系统内置服务比较多，比如：
+· NetworkManager，主网络服务
+· network，副网络服务
+· firewalld，防火墙服务
+· sshd，ssh服务（FinalShell远程登录Linux使用的就是这个服务）
+
+ 除了内置的服务外，部分第三方软件安装后亦可以使用systemctl进行控制
+· yum install -y ntp 安装ntp软件
+可以通过ntpd服务名，配合systemctl进行控制
+· yum install -y httpd 安装apache服务器软件
+可以通过httpd服务名，配合systemctl进行控制
+
+部分软件没有自动集成到systemctl中，我们可以手动添加
+
+04----软链接
+
+*  ln命令创建软链接
+在系统中创建软链接，可以将文件、文件夹链接到其他位置。类似Windows系统中的快捷方式
+语法：ln -s 参数1 参数2 
+· -s选项，创建软链接的文件或文件夹
+· 参数2：要链接去的目的地
+实例：
+· ln -s /etc/yum.conf   ~/yum.conf
+· ln -s /etc/yum    ~/yum
+
+05----日期和时区
+
+* date命令
+通过date命令可以在命令行中查看系统的时间
+语法：date [-d] [+格式化字符串]
+· -d按照给定的字符串显示日期，一般用于日期计算
+· 格式化字符串：通过特定的字符串标记，来控制显示的日期格式
+%Y 年
+%y 年份后两位数字（00..99）
+%m 月份（01..12）
+%d 日（01..31）
+%H 小时（00..23）
+%M 分钟（00.59）
+%S 秒（00.60）
+%s 自 1970-01-01 00:00:00 UTC 到现在的秒数
+
+* 注意事项
+· 使用date命令本体，无选项，直接查看时间
+date
+2024年 09月 09日 星期一 19:49:31 PDT
+· 按照 0000-00-00的格式显示日期
+date +%Y-%m-%d
+2024-09-09
+· 按照 0000-00-00 00:00:00的格式显示日期
+date '+%Y-%m-%d  %H:%m:%S' 中间有空格，用双引号包围
+2024-09-09 19:09:35
+
+* date命令进行日期加减
+· -d选项，可以按照给定的字符串显示日期，一般用于日期计算
+date -d  '+1 day'  + %Y-%m-%d
+date -d  '-1 day'  + %Y-%m-%d
+· 其中支持的时间标记为：
+year
+month
+day
+hour
+Minute
+second
+· -d 选项可以和格式化字符串配合一起使用
+
+*  修改Linux时区
+使用root权限，执行如下命令，修改时区为东八区时区
+rm -f /etc/localtime
+ln -s /usr/share/zoneinfo/Asia/Shanghai  /etc/localtime
+
+*  ntp程序
+我们可以通过ntp程序自动校准系统时间
+yum -y install ntp
+systemctl status ntpd
+systemctl enable ntpd
+· 当ntpd启动后会定期的帮助我们联网校准系统的时间
+· 也可以手动校准：ntpdate -u ntp.aliyun.com
+
+06----IP地址和主机名
+
+*  IP地址
+IP地址主要有两个版本，V4和V6
+· 127.0.0.1.，这个IP地址用于指代本机
+· 0.0.0.0，特殊IP
+	· 可以用于指代本机
+	· 可以在端口绑定中用来确定绑定关系
+	· 在一些IP地址限制中，表示所有IP的意思，如放行规则设置0.0.0.0，表示允许任意IP访问
+
+*  主机名
+每一台电脑除了对外联络地址（IP地址）以外，也可以有一个名字，称为主机名
+# hostname（查看主机名）
+localhost.localdomain
+
+*  修改主机名
+hostnamectl set-hostname 主机名
+
+*  域名解析
+实际上，我们一直通过字符化的地址去访问服务器，很少指定IP地址
+www.baidu.com，是百度的网址，我们称之为域名
+访问www.baidu.com的流程如下：
+访问www.baidu.com---->检查是否有www.baidu.com的IP地址记录---->判断---->是---->打开网站
+															  |
+															  |
+															  否---->联网询问公开DNS服务器是否有记录
+															 www.baidu.com的地址
+查看本机记录：
+· Windows：C:\\Windows\System32\drivers\etc\hosts
+· Linux：/etc/hosts
+
+*  配置主机名映射
+在C:\\Windows\System32\drivers\etc\hosts中配置IP地址、主机名
+
+07----配置固定IP地址
+
+*  配置固定IP
+1、VMware中配置IP地址网关和网段
+子网IP：192.168.88.0
+子网掩码：255.255.255.0
+NAT设置 网关：192.168.88.2
+2、在Linux系统中手动修改文件
+vim /etc/sysconfig/network-scripts/ifcfg-ens33
+编辑文件
+
+修改
+BOOTPROTO="dhcp"  为   BOOTPROTO="static"
+添加
+#ZONE=public
+IPADDR='192.168.88.130'
+NETMASK='255.255.255.0'
+GATEWAY='192.168.88.2'
+DNS1='192.168.88.2'
+
+然后重启网卡
+systemctl stop network
+systemctl start network
+
+08----网络请求和下载
+ 
+*  ping命令
+可以通过ping命令，检查指定的网络服务器是否是可联通状态
+语法：ping  [-c num] IP或主机名
+· 选项：-c，检查的次数，不使用-c选项，将无限次数持续检查
+· 参数：ip或主机名，被检查的服务器的ip地址或主机名地址
+
+*  wget命令
+wget是非交互式的文件下载器，可以在命令行内下载网络文件
+语法：wget [-b] url
+· 选项：-b，可选后台下载，会将日志写入到当前工作目录的wget-log文件
+· 参数：url，下载链接
+示例：
+· 下载apache-hadoop 3.3.0版本：http://archive.apache.org/dist/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz
+· 在后台下载：wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz
+· 通过tail命令可以监控后台下载进度：tail -f wget-log
+
+*  curl命令
+curl可以发送http网络请求，可用于：下载文件、获取信息
+语法：curl  [-0]  url 
+· 选项：-O，用于下载文件，当url是下载链接时，可以使用此选项保存文件
+· 参数：url，要发起请求的网络地址
+示例：
+· 向cip.cc发起网络请求：curl  cip.cc
+· 向Python.itheima.com发起网络请求：curl python.itheima.com
+· 通过cur下载hadoop 3.3.0安装包：curl -O http://archive.apache.org/dist/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz
+
+09----端口
+
+*  端口
+端口，是设备与外界通讯交流的出入口。端口可以分为：物理端口和虚拟端口
+· 物理端口：接口，可见的端口，如USB接口、RJ45网口、HDMI端口
+· 虚拟端口：计算机内部的端口，不可见，用来操作系统和外部进行交互使用的
+Linux可以支持65535端口，分为3类
+· 公认端口：1~1023，用于一些系统内置或知名程序的预留使用
+· 注册端口：1024~49151用于松散的绑定一些程序\服务
+· 动态端口：49152~65535，当程序对外进行网络连接时，用于临时使用
+
+*  查看端口占用
+使用namp命令，安装：yum -y install nmap
+语法：namp 被查看的IP地址
+示例：
+# nmap 127.0.0.1
+Starting Nmap 6.40 ( http://nmap.org ) at 2024-09-11 09:08 CST
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.0000080s latency).
+Not shown: 995 closed ports
+PORT     STATE SERVICE
+22/tcp   open  ssh
+25/tcp   open  smtp
+111/tcp  open  rpcbind
+631/tcp  open  ipp
+6000/tcp open  X11
+
+*  netstat命令
+可以通过netstat命令，查看指定端口占用情况
+语法：netstat -anp | grep  端口号
+示例：
+netstat -anp 显示所有端口和网络连接情况
+netstat -anp | grep  111
+netstat -anp | grep  12345  无结果，表明端口12345无人占用
+
+10----进程管理
+
+*  查看进程
+可以通过ps命令查看Linux系统中的进程信息
+语法：ps [-e -f]
+· 选项：-e，显示出全部的进程
+· 选项：-f，以完全格式化的形式展示信息（展示全部信息）
+
+ID         PID   PPID  C STIME TTY          TIME CMD
+root          1      0  0 21:12 ?        00:00:03 /usr/lib/systemd/systemd --switched-root --system --deserialize 22
+root          2      0  0 21:12 ?        00:00:00 [kthreadd]
+root          3      2  0 21:12 ?        00:00:00 [ksoftirqd/0]
+root          5      2  0 21:12 ?        00:00:00 [kworker/0:0H]
+root          7      2  0 21:12 ?        00:00:00 [migration/0]
+root          8      2  0 21:12 ?        00:00:00 [rcu_bh]
+· ID：进程所属的用户ID
+· PID ：进程的进程号ID
+· PPID：进程的父ID（启动此进程的其他进程）
+· C：此进程的CPU占用率（百分比）
+· STIME：进程的启动时间
+· TTY：启动此进程的终端序号，如显示？，表示非终端启动   
+· TIME：进程占用CPU的时间
+· CMD：进程对应的名称或启动路径或启动命令
+
+*  查看指定进程
+使用管道符 
+如：ps -ef |grep '21:28'   ps -ef |grep 33268
+
+*  关闭进程
+在Linux系统中，可以通过kill命令关闭进程
+语法：kill [-9]  进程ID
+· 选项：-9.表示强制关闭进程。
+
+11----主机状态监控
+
+*  查看系统资源占用
+可以通过top命令查看CPU、内存使用情况，类似Windows的任务管理器，默认5秒刷新，可用q键退出或Ctrl C。
+#  top
+top - 21:51:53 up 39 min,  5 users,  load average: 0.43, 0.49, 0.43  
+· top：命令名称，21:51:53：当前系统时间，up 39 min：启动了39分钟，5 users：5个用户登录， load average: 0.43, 0.49, 0.43：1、5、15分钟负载
+
+Tasks: 209 total,   3 running, 205 sleeping,   0 stopped,   1 zombie
+· Tasks 209 total：209个进程，3 running：3个进程在运行，205 sleeping：205个进程睡眠，0 stopped：0个停止进程， 1 zombie：1个僵尸进程
+
+%Cpu(s):  8.7 us, 14.1 sy,  0.0 ni, 76.8 id,  0.0 wa,  0.0 hi,  0.3 si,  0.0 st
+· %Cpu(s)：CPU使用率，us：用户CPU使用率，sy：系统CPU使用率，ni：高优先级进程占用CPU时间百分比，id：空闲CPU率，wa：IO等待CPU占用率，hi：CPU硬件中断率，si：CPU软件中断率，st：强制等待占用CPU率
+
+KiB Mem :   995896 total,    70520 free,   626600 used,   298776 buff/cache
+KiB Swap:  2098172 total,  2082812 free,    15360 used.   151396 avail Mem 
+· KiB Mem :   物理内存， total：总量，free：空闲，used：使用，buff/cache：buff/cache占用
+  KiB Swap:  虚拟内存（交换空间）
+
+* top命令内容详解
+ PID 	USER     		 PR  	NI   	 VIRT    		RES    	SHR 	S 	%CPU 	%MEM     	TIME+ 	COMMAND                                                                                                               
+  8661 	itheima   	20  	 0 	 161256  		2644   	 916 	S 	 2.0  	0.3  			 0:39.23 	sshd                                                                                                                  
+ 33268 	itheima   	20   	0  	161252   		2964   	1216 	S  	1.7  		0.3  		 	 0:23.96 	sshd                                                                                                                  
+     3 	root      		20   	0       0     		 0      	0 		S  	0.3  		0.0   		 0:01.76 	ksoftirqd/0                                                                                                           
+  2900 	root      		20   	0       0     		 0      	0 		S 	 0.3 		 0.0  		 0:02.01	 xfsaild/sda3
+PID： 进程ID	
+USER：进程所属用户     		 
+PR：进程优先级，越小越高  	
+NI：负值表示高优先级，正值表示低优先级   	 
+VIRT：进程使用虚拟内存，单位KB    		
+RES：进程使用物理内存，单位KB    	
+SHR：进程使用共享内存，单位KB 	
+S：进程状态（S休眠，R运行，Z僵死状态，N负数优先级，I空闲状态） 	
+%CPU：进程占用CPU率 	
+%MEM：进程占用内存率     	
+TIME+：进程使用CPU时间总计，单位10毫秒 	
+COMMAND：进程的命令或名称或程序文件路径
+
+*  top命令选项
+top命令也支持选项：
+选项			功能
+-p			只显示某个进程的信息		top -p 1   进程号
+-d			设置刷新时间，默认是5s		top -d 3
+-c			显示产生进程的完整命令，默认是进程名		top -c
+-n			指定刷新次数		top -n  3
+-b			以非交互非全屏模式运行，以批次的方式执行top，一般配合-n指定输出几次统计信息，将输出重定向到指定文件，比如 top -b -n 3 >  /tmp/top.tmp
+-i			不显示任何闲置（idle）或无用（zombie）的进程	top   -i
+-u			查找特定用户启动的进程		top -u root
+
+*  top交互式选项
+用时见14分钟
+
+*  磁盘信息监控
+使用df命令，可以查看硬盘的使用情况
+语法：df  [-h]
+· 选项：-h，以更加人性化的单位显示
+
+*  iostat命令
+可以使用iostat查看CPU、磁盘的相关信息
+语法：iostat  [-x]  [num1]  [num2]
+· 选项：-x，显示更多信息
+· num1：数字，刷新间隔，num2：数字，刷新次数
+# iostat
+示例：
+Device:            tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn
+sda              60.11      4088.05       114.70    3937122     110464
+tps：该设备每秒的传输次数
+
+# iostat -x
+示例：
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util（磁盘利用率）
+sda               0.88    16.42   52.43    3.47  3800.93   106.82   139.80     0.10    1.81    1.78    2.34   0.58   3.25
+
+*  网络状态监控
+可以使用sar命令查看网络的相关统计
+语法：sar  -n DEV num1  num2
+· 选项：-n，查看网络，DEV表示查看网络接口
+· num1：刷新间隔（不填就查看一次），num2：刷新次数（不填无限次数）
+示例：
+# sar -n DEV
+09时40分01秒     IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s   rxcmp/s   txcmp/s  rxmcst/s
+09时50分01秒        lo      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+09时50分01秒 virbr0-nic      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+09时50分01秒    virbr0      0.00      0.00      0.00      0.00      0.00      0.00      0.00
+rxkB/s txkB/s 每秒钟接收发送的数据包大小
+
+12----环境变量
+
+*  环境变量
+环境变量是操作系统在运行的时候，记录的一些关键性信息，用以辅助系统运行。在Linux系统中执行：env命令即可查看当前系统中记录的环境变量
+
+*  PATH
+PATH记录系统执行任何命令的搜索路径
+# env | grep PATH
+PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/itheima/.local/bin:/home/itheima/bin
+
+*  $
+在Linux系统中，$符号用于取‘变量’的值
+语法：echo $PATH
+ # echo $PATH
+/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/itheima/.local/bin:/home/itheima/bin
+当和其他内容混合在一起的时候，可以通过{}来标注取的变量是谁
+# echo ${PATH}ABC
+/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/itheima/.local/bin:/home/itheima/binABC
+
+*  自行设置环境变量
+Linux环境变量可以用户自行设置，其中分为：
+· 临时设置，语法：export变量名=变量值
+· 永久生效
+	· 针对当前用户生效，配置在当前用户的：.bashrc
+	· 针对所有用户生效，配置在系统的： /etc/profile
+	· 并通过语法：source配置文件，进行立刻生效，或重新登录FinalShell生效
+示例：
+1、针对当前用户
+vim ~/.bashrc
+加入：export $MYNAME=itheima
+source  .bashrc
+
+2、针对所有用户
+vim /etc/profile
+加入：export $MYNAME=itcast
+source  /etc/profile
+切换到其他用户查看：
+# su - test4
+[test4@centos ~]$ echo $MYNAME
+itcast
+
+3、自定义环境变量PATH
+mkdir myenv
+vim mkhaha
+文件内容：echo '哈哈哈'
+cd myenv
+mkhaha
+哈哈哈（但是只能在这个目录下执行）
+修改文件权限：chmod 755 mkhaha（rwxr-xr-x）
+vim /etc/profile
+文件内容：export PATH=$PATH:/root/myenv
+source /etc/profile
+到其他目录也可以执行：
+# cd /tmp
+# mkhaha
+哈哈哈
+
+13----Linux的上传和下载
+
+*  上传、下载
+浏览文件系统，右键点击下载
+浏览文件系统，拖拽文件上传
+
+*  rz、sz命令
+· rz（上传）
+· sz  要下载文件（下载）
+
+14----压缩和解压
+
+*  tar命令
+两种压缩格式：
+· .tar，称为tarball，归档文件，简单的封装
+· .gz，也常见为.tar.gz，压缩
+语法：tar [-c -v -x -f -z -C]  参数1  参数2 ...  参数N
+· -c，创建压缩文件，用于压缩模式
+· -v，显示压缩、解压过程，用于查看进度
+· -x，解压模式
+· -f，要创建的文件，或要解压的文件，-f选项必须在所有选项中位置处于最后一个
+· -z，gzip模式，不使用-z就是普通的tarball模式
+· -C，选择解压的目的地，用于解压模式
+
+* tar压缩常用组合
+· tar -cvf test.tar 1.txt 2.txt 3.txt
+将1.txt 2.txt 3.txt 压缩到 test.tar文件内
+· tar -zcvf test.tar.gz 1.txt 2.txt 3.txt
+将1.txt 2.txt 3.txt 压缩到 test.tar.gz 文件内，使用zgip模式
+注意：
+· -z选项如果使用的话，一般处于选项为第一个
+· -f选项，必须在选项位最后一个
+
+* tar解压常用组合
+· tar -xvf test.tar 
+解压 test.tar，将文件解压至当前目录
+· tar -zxvf test.tar.gz  -C /home/itheima
+使用zgip模式解压 test.tar.gz ，将文件解压至指定目录
+注意：
+· -f选项，必须在选项位最后一个
+· -z选项建议在开头
+· -C选项单独使用，和解压所需的其他参数分开
+
+* zip命令压缩文件
+语法：zip [-r] 参数1 参数2 ... 参数N
+· -r，被压缩的包含文件夹的时候，需要使用-r选项，和rm、cp等命令的-r效果一致
+示例：
+
+*  unzip命令解压文件
+语法：unzip [-d] 参数
+· -d，指定要解压去的位置，同tar的-C选项
+· 参数，被解压的zip压缩包文件
+示例：
+· unzip test.zip，将test.zip解压到当前目录
+· unzip test.zip -d /home/itheima，将test.zip解压到指定目录
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

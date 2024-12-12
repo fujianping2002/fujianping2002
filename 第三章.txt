@@ -1,0 +1,147 @@
+01----Linux的root用户
+
+*  su和exit命令
+su命令就是用于账户切换的系统命令，其来源英文单词：Switch User
+语法：su [-] [用户名]
+· - 符号是可选的，表示是否在切换用户后加载环境变量，建议带上
+· 参数：用户名，表示要切换的用户，用户名也可以省略，省略表示切换到root
+· 切换用户后，可以使用exit命令退回上一个用户，也可以使用快捷键 Ctrl+d
+
+*  sudo命令
+我们可以使用sudo命令，为普通的命令授权，临时以root身份执行
+语法：sudo 其他命令
+· 在其他命令之前，带上sudo，即可为这一条命令临时赋予root授权
+· 但是不是所有用户，都有权利使用sudo，我们需要为普通用户配置sudo认证
+
+*  为普通用户配置sudo认证
+· 切换root用户，执行visudo命令，会自动通过vi编辑器打开：/etc/sudoers
+· 在文件的最后添加：itheima ALL=(ALL) NOPASSWD: ALL
+· 最后通过wq保存
+· 切换回普通用户
+sudo 命令
+· 执行的命令，均以root运行
+
+02----用户和用户组
+
+*  用户组管理
+以下命令需要root用户执行
+· 创建用户组
+groupadd 用户组名
+· 删除用户组
+groupdel 用户组名
+
+* 用户管理
+以下命令需root用户执行
+· 创建用户
+useradd [-g -d] 用户名
+1、选项-g：指定用户的组，不知道-g，会创建同名组并自动加入，知道-g需要组已经存在，如已存在同名组，必须使用-g
+2、选项-d：指定用户HOME路径，不指定，HOME目录默认在：/home/用户名
+· 删除用户
+userdel 用户名
+1、选项-r：删除用户的HOME目录，不使用-r，删除用户时，HOME目录保留
+· 查看用户所属组
+id [用户名]
+1、参数：用户名，被查看的用户，如果不指定则查看自身
+· 修改用户所属组
+usermod -aG 用户组 用户名，将指定用户加入指定用户组
+
+*  getent
+使用getent命令，可以查看当前系统中有哪些用户
+语法：getent passwd
+共有七份信息：用户名；密码；用户ID；组ID；描述信息(无用)；HOME目录；执行终端(默认bash)
+使用getent命令，可以查看当前系统中有哪些用户组
+语法：getent group
+共有三份信息：组名称；组认证；组ID
+
+03----查看权限控制信息
+
+*  认知权限信息
+[itheima@localhost ~]$ ls -l
+总用量 12
+drwxr-xr-x. 3 itheima itheima 34 9月   2 06:50 Desktop
+drwxr-xr-x. 2 itheima itheima  6 8月  29 02:14 Documents
+drwxr-xr-x. 2 itheima itheima  6 8月  29 02:14 Downloads
+-rw-rw-r--. 1 itheima itheima 23 9月   5 01:24 hello2.txt
+-rw-rw-r--. 1 itheima itheima 31 9月   5 01:27 hello.txt
+drwxr-xr-x. 2 itheima itheima  6 8月  29 02:14 Music
+drwxr-xr-x. 2 itheima itheima  6 8月  29 02:14 Pictures
+drwxr-xr-x. 2 itheima itheima  6 8月  29 02:14 Public
+drwxr-xr-x. 2 itheima itheima  6 8月  29 02:14 Templates
+-rw-rw-r--. 1 itheima itheima 63 9月   5 01:59 test.txt
+drwxr-xr-x. 2 itheima itheima  6 8月  29 02:14 Videos
+        1                   2            3
+· 序号1，表示文件、文件夹的权限控制信息
+· 序号2，表示文件、文件夹所属用户
+· 序号3，表示文件、文件夹所属用户组
+
+序号1权限细节，10个槽位
+			属用户权限			所属用户组权限		其他用户权限
+-或d或I		-  w或-  x或-			r或-  w或-  x或-		r或-  w或-  x或-
+-表示文件		r 读 
+d表示文件夹		w 写
+I表示软连接		x 执行
+举例：drwxr-xr-x
+· 这是一个文件夹，首字母d表示
+· 所属用户权限，rwx
+· 所属用户组权限，r-x
+· 其他用户权限，r-x
+
+04----修改权限控制，chmod命令
+
+*  chmod命令
+我们可以使用chmod命令修改文件、文件夹的权限信息，只有文件、文件夹的所属用户或root用户可以修改
+语法：chmod [-R] 权限 文件或文件夹
+· 选项：-R，对文件夹内的全部内容应用同样的权限
+示例：user group other
+· chmod u=rwx,g=rx,o=x hello.txt ，将文件权限修改为：rwxr-x--x
+· chmod -R u=rwx,g=rx,o=x test，将文件夹test以及文件夹内全部内容权限设置为：rwxr-x--x
+
+*  权限的数字序号
+二进制
+0-7
+751 rwxr-x-x
+123 --x-w-wx
+
+05----修改权限控制，chown命令
+
+*  chown命令
+我们可以使用chmod命令修改文件、文件夹的所属用户和用户组，只适用于root用户可以执行
+语法：chown [-R] [用户] [:] [用户组] 文件或文件夹
+· 选项，-R，用chmod，对文件夹内全部内容应用相同规则
+· 选项，用户，修改所属用户
+· 选项，用户组，修改所属用户组
+· :用于分隔用户和用户组
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
