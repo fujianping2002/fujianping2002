@@ -1,4 +1,4 @@
-- 👋 Hi, I’m @fujianping2002
+- 👋 Hi, I’m @fujianping
 - 👀 I’m interested in data
 - 🌱 I’m currently learning hadoop
 - 💞️ I’m looking to collaborate on ...
